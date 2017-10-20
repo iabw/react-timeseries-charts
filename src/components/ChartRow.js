@@ -19,6 +19,7 @@ import Charts from "./Charts";
 import TimeMarker from "./TimeMarker";
 import YAxis from "./YAxis";
 import ScaleInterpolator from "../js/interpolators";
+import Label from "./Label";
 
 const AXIS_MARGIN = 5;
 
@@ -416,6 +417,55 @@ export default class ChartRow extends React.Component {
             );
         }
 
+        // Hover tracker line
+        let trackerVertical;
+        if (this.props.trackerVertical && this.props.trackerVertical.position) {
+            const yScaleRange = this.scaleMap[this.props.trackerVertical.scale].sourceScale
+                .range()
+                .sort();
+            const min = Math.min.apply(null, yScaleRange);
+            const max = Math.max.apply(null, yScaleRange);
+            if (
+                yScaleRange &&
+                this.props.trackerVertical.position > min &&
+                this.props.trackerVertical.position < max
+            ) {
+                const defaultTrackerVerticalStyle = {
+                    stroke: "#ccc",
+                    strokeWidth: 0.5,
+                    fill: "none",
+                    pointerEvents: "none"
+                };
+
+                let labelPosition = this.props.trackerVertical.position - 24;
+                if (labelPosition < 0) labelPosition = 0;
+
+                trackerVertical = (
+                    <g
+                        key="tracker-vertical-group"
+                        style={{ pointerEvents: "none" }}
+                        transform={`translate(${leftWidth},0)`}
+                    >
+                        <line
+                            x1={0}
+                            y1={this.props.trackerVertical.position}
+                            x2={this.props.width}
+                            y2={this.props.trackerVertical.position}
+                            style={this.props.trackerVertical.style || defaultTrackerVerticalStyle}
+                        />
+                        <g transform={`translate(15,${labelPosition})`}>
+                            <Label
+                                align={"left"}
+                                label={this.props.trackerVertical.info}
+                                height={24}
+                                width={100}
+                            />
+                        </g>
+                    </g>
+                );
+            }
+        }
+
         return (
             <g>
                 {clipper}
@@ -423,6 +473,7 @@ export default class ChartRow extends React.Component {
                 {charts}
                 {brushes}
                 {tracker}
+                {trackerVertical}
             </g>
         );
     }

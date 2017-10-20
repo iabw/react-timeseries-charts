@@ -65,14 +65,42 @@ const baselines = React.createClass({
     handleTrackerChanged(tracker) {
         this.setState({ tracker });
     },
+    handleMouseMove(x, y) {
+        this.setState({
+            trackerVertical: {
+                position: y,
+                scale: "price",
+                info: "Price: $" + this.refChartRow.scaleMap.price.sourceScale.invert(y).toFixed(4),
+                style: {
+                    strokeDasharray: "5,3",
+                    stroke: "#ccc",
+                    strokeWidth: 0.5,
+                    fill: "none",
+                    pointerEvents: "none"
+                }
+            }
+        });
+    },
     handleTimeRangeChange(timerange) {
         this.setState({ timerange });
     },
     render() {
         return (
             <Resizable>
-                <ChartContainer timeRange={series.range()} format="%b '%y">
-                    <ChartRow height="150">
+                <ChartContainer
+                    trackerPosition={this.state.tracker}
+                    onTrackerChanged={t => this.handleTrackerChanged(t)}
+                    onMouseMove={(x, y) => this.handleMouseMove(x, y)}
+                    timeRange={series.range()}
+                    format="%b '%y"
+                >
+                    <ChartRow
+                        height="150"
+                        ref={chartRow => {
+                            this.refChartRow = chartRow;
+                        }}
+                        trackerVertical={this.state.trackerVertical}
+                    >
                         <YAxis
                             id="price"
                             label="Price ($)"
